@@ -312,7 +312,7 @@ function checkAnswer() {
     feedbackEl.textContent = ANSWER + "のボックスが解錠されました。";
     feedbackEl.style.background = "#B4DDC0";
     feedbackEl.style.padding = "8px 10px";
-    // TODO: notify room.html of unlock state, then return there
+    localStorage.setItem('unlocked_' + ANSWER, 'true');
   } else {
     feedbackEl.textContent = "入力されたパスワードに誤りがあります。";
     feedbackEl.style.background = "#E3B0A6";
