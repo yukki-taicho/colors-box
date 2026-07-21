@@ -27,7 +27,7 @@
   html, body { height: 100%; width: 100%; overflow: hidden; }
   body {
     font-family: var(--display);
-    background: #252505;
+    background: #51545b;
     color: var(--text-primary);
     position: relative;
   }
@@ -182,6 +182,99 @@
     border: 1px solid var(--line);
   }
   .item-slot img { width: 70%; height: 70%; object-fit: contain; }
+  .item-slot.filled { cursor: pointer; }
+
+  /* ---- Item detail modal (tap an item to enlarge and transform it) ---- */
+  #itemModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+  #itemModal.open { display: flex; }
+  #itemModalCard {
+    background: #1d1d22;
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    max-width: 300px;
+    width: 90%;
+  }
+  #itemModalPreview {
+    width: 140px; height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #itemModalPreview img {
+    max-width: 100%; max-height: 100%;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+  }
+  #itemModalControls {
+    display: flex;
+    gap: 10px;
+  }
+  #itemModalControls button {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #26262e;
+    color: var(--text-primary);
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  #itemModalControls button:hover { background: #2f2f39; }
+  #itemModalDrag {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    background: #26262e;
+    border: 1px dashed var(--line);
+    text-align: center;
+    font-family: var(--jp);
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: grab;
+  }
+  #itemModalClose {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  /* ---- Drop target on the puzzle image ---- */
+  .drop-target {
+    position: absolute;
+    border: 2px dashed rgba(232,230,224,0.5);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .drop-target.filled {
+    border-style: solid;
+    border-color: rgba(232,230,224,0.9);
+  }
+  .drop-target img {
+    width: 90%; height: 90%;
+    object-fit: contain;
+  }
+  .drop-target.drag-over {
+    background: rgba(232,230,224,0.15);
+  }
 </style>
 </head>
 <body>
@@ -193,7 +286,10 @@
       <path d="M 17 7 L 10 13 L 17 19" stroke="#e8e6e0" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
-  <img src="puzzle-cicada.png" alt="CICADAの謎" />
+  <div id="puzzleImgWrap" style="position: relative; max-width: 100%; max-height: 100%;">
+    <img id="puzzleImg" src="puzzle-cicada.png" alt="CICADAの謎" />
+    <div class="drop-target" id="dropTarget1" data-accepts="two-panel" style="left:38%; top:62%; width:9%; height:14%;"></div>
+  </div>
 </div>
 
 <div id="passwordArea">
@@ -223,8 +319,22 @@
   </div>
 </div>
 
+<div id="itemModal">
+  <div id="itemModalCard">
+    <div id="itemModalPreview"><img id="itemModalImg" src="" alt="" /></div>
+    <div id="itemModalControls">
+      <button id="flipHBtn">左右反転</button>
+      <button id="flipVBtn">上下反転</button>
+      <button id="rotateBtn">90°回転</button>
+    </div>
+    <div id="itemModalDrag" draggable="true">ここをドラッグして謎の枠に配置</div>
+    <button id="itemModalClose">閉じる</button>
+  </div>
+</div>
+
 <script>
 const ANSWER = 'CICADA';
+let puzzleConditionMet = false;
 
 const strokeW = 7;
 function line(x1,y1,x2,y2) { return { x1, y1, x2, y2 }; }
@@ -308,7 +418,7 @@ function checkAnswer() {
     feedbackEl.style.padding = "0";
     return;
   }
-  if (userAnswer === ANSWER) {
+  if (userAnswer === ANSWER && puzzleConditionMet) {
     feedbackEl.textContent = ANSWER + "のボックスが解錠されました。";
     feedbackEl.style.background = "#B4DDC0";
     feedbackEl.style.padding = "8px 10px";
@@ -337,6 +447,173 @@ itemTab.addEventListener('click', () => {
 document.getElementById('backBtn').addEventListener('click', () => {
   window.location.href = 'room.html';
 });
+
+// ---- Inventory (shared with room.html via localStorage) ----
+function getInventory() {
+  try {
+    const raw = localStorage.getItem('inventory');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+function saveInventory(items) {
+  localStorage.setItem('inventory', JSON.stringify(items));
+}
+
+// Render the inventory into the 5 item slots (index-aligned with the array)
+function renderItemSlots() {
+  const slots = Array.from(document.querySelectorAll('.item-slot'));
+  const inv = getInventory();
+  slots.forEach((slot, i) => {
+    const item = inv[i];
+    if (item) {
+      slot.classList.add('filled');
+      slot.dataset.itemId = item.id;
+      slot.dataset.itemIndex = i;
+      slot.innerHTML = `<img src="${item.imgSrc}" alt="${item.label}" style="transform: ${transformFor(item)};" />`;
+      slot.draggable = true;
+    } else {
+      slot.classList.remove('filled');
+      slot.removeAttribute('data-item-id');
+      slot.removeAttribute('data-item-index');
+      slot.innerHTML = '';
+      slot.draggable = false;
+    }
+  });
+}
+
+// Build a CSS transform string from an item's stored flip/rotate state
+function transformFor(item) {
+  const flipH = item.flipH ? -1 : 1;
+  const flipV = item.flipV ? -1 : 1;
+  const rot = item.rotate || 0;
+  return `scale(${flipH}, ${flipV}) rotate(${rot}deg)`;
+}
+
+// ---- Item detail modal: tap an item to enlarge and transform it ----
+const itemModal = document.getElementById('itemModal');
+const itemModalImg = document.getElementById('itemModalImg');
+let modalItemIndex = null;
+
+function openItemModal(index) {
+  const inv = getInventory();
+  const item = inv[index];
+  if (!item) return;
+  modalItemIndex = index;
+  itemModalImg.src = item.imgSrc;
+  itemModalImg.alt = item.label;
+  itemModalImg.style.transform = transformFor(item);
+  itemModal.classList.add('open');
+}
+
+function closeItemModal() {
+  itemModal.classList.remove('open');
+  modalItemIndex = null;
+}
+
+document.getElementById('itemModalClose').addEventListener('click', closeItemModal);
+itemModal.addEventListener('click', (e) => {
+  if (e.target === itemModal) closeItemModal();
+});
+
+document.getElementById('flipHBtn').addEventListener('click', () => {
+  if (modalItemIndex === null) return;
+  const inv = getInventory();
+  inv[modalItemIndex].flipH = !inv[modalItemIndex].flipH;
+  saveInventory(inv);
+  itemModalImg.style.transform = transformFor(inv[modalItemIndex]);
+  renderItemSlots();
+});
+
+document.getElementById('flipVBtn').addEventListener('click', () => {
+  if (modalItemIndex === null) return;
+  const inv = getInventory();
+  inv[modalItemIndex].flipV = !inv[modalItemIndex].flipV;
+  saveInventory(inv);
+  itemModalImg.style.transform = transformFor(inv[modalItemIndex]);
+  renderItemSlots();
+});
+
+document.getElementById('rotateBtn').addEventListener('click', () => {
+  if (modalItemIndex === null) return;
+  const inv = getInventory();
+  inv[modalItemIndex].rotate = ((inv[modalItemIndex].rotate || 0) + 90) % 360;
+  saveInventory(inv);
+  itemModalImg.style.transform = transformFor(inv[modalItemIndex]);
+  renderItemSlots();
+});
+
+// Tap an item slot (not dragging) to open its modal
+document.getElementById('itemSlots').addEventListener('click', (e) => {
+  const slot = e.target.closest('.item-slot');
+  if (!slot || !slot.classList.contains('filled')) return;
+  openItemModal(Number(slot.dataset.itemIndex));
+});
+
+// ---- Drag and drop: item slots -> drop targets on the puzzle image ----
+let draggedItemIndex = null;
+
+document.getElementById('itemSlots').addEventListener('dragstart', (e) => {
+  const slot = e.target.closest('.item-slot');
+  if (!slot || !slot.classList.contains('filled')) return;
+  draggedItemIndex = Number(slot.dataset.itemIndex);
+});
+
+// Also allow dragging directly from the modal's drag handle
+document.getElementById('itemModalDrag').addEventListener('dragstart', () => {
+  draggedItemIndex = modalItemIndex;
+});
+
+document.querySelectorAll('.drop-target').forEach(target => {
+  target.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    target.classList.add('drag-over');
+  });
+  target.addEventListener('dragleave', () => {
+    target.classList.remove('drag-over');
+  });
+  target.addEventListener('drop', (e) => {
+    e.preventDefault();
+    target.classList.remove('drag-over');
+    if (draggedItemIndex === null) return;
+
+    const inv = getInventory();
+    const item = inv[draggedItemIndex];
+    if (!item) return;
+
+    // Place the item visually in the drop target
+    target.classList.add('filled');
+    target.innerHTML = `<img src="${item.imgSrc}" alt="${item.label}" style="transform: ${transformFor(item)};" />`;
+    target.dataset.placedItemId = item.id;
+    target.dataset.placedFlipH = item.flipH ? '1' : '0';
+    target.dataset.placedFlipV = item.flipV ? '1' : '0';
+    target.dataset.placedRotate = item.rotate || 0;
+
+    // Remove the item from the inventory (it's "in use" on the puzzle now)
+    inv.splice(draggedItemIndex, 1);
+    saveInventory(inv);
+    renderItemSlots();
+
+    draggedItemIndex = null;
+    checkPuzzleSolved();
+  });
+});
+
+// ---- Puzzle-specific solved condition ----
+// CICADA: the "two-panel" item must be placed in dropTarget1, flipped horizontally
+// (so the "2" reads as a "5"), to make "祝い＋5＝イワシ" hold.
+function checkPuzzleSolved() {
+  const target = document.getElementById('dropTarget1');
+  const correct =
+    target.dataset.placedItemId === 'two-panel' &&
+    target.dataset.placedFlipH === '1';
+  if (correct) {
+    puzzleConditionMet = true;
+  }
+}
+
+renderItemSlots();
 </script>
 
 </body>
