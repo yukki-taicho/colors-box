@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DECADE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16161a;
+    --panel: #1d1d22;
+    --panel-border: #2c2c33;
+    --line: #e0e0e4;
+    --text-primary: #e8e6e0;
+    --text-secondary: #4a4a30;
+    --text-muted: #55545e;
+    --text-danger: #7a2e1f;
+    --text-success: #141403;
+    --radius: 10px;
+    --mono: 'JetBrains Mono', monospace;
+    --display: 'Space Grotesk', sans-serif;
+    --jp: 'Zen Kaku Gothic New', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; width: 100%; overflow: hidden; }
+  body {
+    font-family: var(--display);
+    background: #5d545d;
+    color: var(--text-primary);
+    position: relative;
+  }
+
+  /* ---- Top half: puzzle image ---- */
+  #puzzleArea {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 52%;
+    background: #5d545d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow: hidden;
+  }
+  #puzzleArea img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+  #backBtn {
+    position: absolute;
+    top: 16px; left: 16px;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: rgba(37,37,5,0.75);
+    border: 1px solid var(--panel-border);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 10;
+  }
+  #backBtn:hover { background: rgba(58,58,8,0.9); }
+
+  /* ---- Bottom half: password panel ---- */
+  #passwordArea {
+    position: absolute;
+    top: 52%; left: 0; right: 0; bottom: 0;
+    background: #5d545d;
+    background-image: none;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 8px 16px;
+  }
+  #panel {
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid #b1a1b1;
+    border-radius: 16px;
+    padding: 1.25rem 1.1rem;
+    background: #DECADE;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6);
+  }
+  #eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: rgba(20,20,3,0.55);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  #glyphDisplay { width: 100%; height: auto; margin-bottom: 16px; display: block; }
+  #inputArea { display: flex; gap: 8px; margin-bottom: 12px; }
+  input[type="text"] {
+    flex: 1; padding: 12px 14px; border-radius: var(--radius);
+    border: 1px solid rgba(20,20,3,0.35); font-size: 15px;
+    background: rgba(20,20,3,0.18); color: #141403;
+    letter-spacing: 2px;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    outline: none;
+  }
+  input[type="text"]::placeholder { color: rgba(20,20,3,0.45); }
+  button.enterBtn {
+    padding: 12px 20px; border-radius: var(--radius);
+    border: 1px solid rgba(20,20,3,0.35); background: rgba(20,20,3,0.18);
+    font-size: 13px; cursor: pointer; color: #141403;
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+  button.enterBtn:hover { background: rgba(20,20,3,0.28); }
+  #feedback {
+    min-height: 18px; font-size: 13px;
+    font-family: var(--jp);
+    line-height: 1.5;
+    color: #141403;
+    border-radius: 6px;
+    display: inline-block;
+    transition: background 0.2s ease, padding 0.2s ease;
+  }
+
+  /* ---- Item drawer (independent of the password panel, anchored to viewport bottom) ---- */
+  #itemDrawer {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: #6a6f77;
+    border-top: 1px solid var(--panel-border);
+    transform: translateY(calc(100% - 62px));
+    transition: transform 0.3s ease;
+    padding: 18px 20px 22px;
+    z-index: 50;
+  }
+  #itemDrawer.open {
+    transform: translateY(0);
+  }
+  #itemTab {
+    position: absolute;
+    top: -28px; left: 50%;
+    transform: translateX(-50%);
+    width: 56px; height: 28px;
+    background: #6a6f77;
+    border: 1px solid var(--panel-border);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+  #itemDrawerLabel {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  #itemSlots {
+    display: flex;
+    gap: 12px;
+    max-width: 340px;
+  }
+  .item-slot {
+    flex: 1;
+    aspect-ratio: 1;
+    max-width: 56px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .item-slot.filled {
+    background: #474047;
+    border: 1px solid var(--line);
+  }
+  .item-slot img { width: 70%; height: 70%; object-fit: contain; }
+  .item-slot.filled { cursor: pointer; }
+
+  /* ---- Inline mini toolbar: appears next to a selected item ---- */
+  #miniToolbar {
+    position: fixed;
+    display: none;
+    gap: 6px;
+    background: #1d1d22;
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 8px 24px -8px rgba(0,0,0,0.6);
+    z-index: 210;
+  }
+  #miniToolbar.open { display: flex; }
+  #miniToolbar button {
+    width: 34px; height: 34px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: #26262e;
+    color: var(--text-primary);
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #miniToolbar button:hover { background: #2f2f39; }
+  .item-slot.selected {
+    outline: 2px dashed #B4DDC0;
+    outline-offset: 3px;
+    border-radius: 8px;
+  }
+  #itemDrawer.return-target {
+    outline: 2px dashed #B4DDC0;
+    outline-offset: -4px;
+  }
+
+  /* ---- Item-transformed overlay (e.g. brush -> red brush) ---- */
+  #acquireOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  #acquireOverlay.open { display: flex; opacity: 1; }
+  #acquireCard {
+    background: #1d1d22;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    max-width: 280px;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+  }
+  #acquireOverlay.open #acquireCard { transform: scale(1); }
+  #acquireIconWrap {
+    width: 100px; height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #acquireIconWrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  #acquireLabel {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  #acquireName {
+    font-family: var(--jp);
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+  }
+  #acquireOkBtn {
+    margin-top: 8px;
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #26262e;
+    color: var(--text-primary);
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  #acquireOkBtn:hover { background: #2f2f39; }
+
+  /* ---- Free placement area on the puzzle image ---- */
+  #placementArea {
+    position: absolute;
+    inset: 0;
+  }
+  #placementArea.armed {
+    cursor: pointer;
+  }
+  #placementArea.armed::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(180,221,192,0.06);
+    animation: pulseArmed 1.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes pulseArmed {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+  .placed-item {
+    position: absolute;
+    width: 20%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+  }
+  .placed-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .placed-item.selected {
+    outline: 2px dashed #B4DDC0;
+    outline-offset: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div id="puzzleArea">
+  <button id="backBtn">
+    <svg viewBox="0 0 40 40" width="20" height="20" fill="none">
+      <path d="M 30 26 C 30 18 24 13 16 13 L 11 13" stroke="#e8e6e0" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 17 7 L 10 13 L 17 19" stroke="#e8e6e0" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div id="debugCoords" style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); color:#fff; font-family: var(--mono); font-size:11px; padding:6px 10px; border-radius:6px; z-index:30; display:none;"></div>
+  <div id="puzzleImgWrap" style="position: relative; max-width: 100%; max-height: 100%;">
+    <img id="puzzleImg" src="puzzle-decade.png" alt="DECADEの謎" />
+    <div id="placementArea"></div>
+  </div>
+</div>
+
+<div id="passwordArea">
+  <div id="panel">
+    <div id="eyebrow">PASSWORD</div>
+
+    <svg id="glyphDisplay" viewBox="0 0 480 90"></svg>
+
+    <div id="inputArea">
+      <input id="answerInput" type="text" placeholder="PASSWORD" autocomplete="off" maxlength="6" />
+      <button class="enterBtn" id="submitBtn">Enter</button>
+    </div>
+
+    <div id="feedback"></div>
+  </div>
+</div>
+
+<div id="itemDrawer">
+  <div id="itemTab">^</div>
+  <div id="itemDrawerLabel">ITEM</div>
+  <div id="itemSlots">
+    <div class="item-slot" data-slot="0"></div>
+    <div class="item-slot" data-slot="1"></div>
+    <div class="item-slot" data-slot="2"></div>
+    <div class="item-slot" data-slot="3"></div>
+    <div class="item-slot" data-slot="4"></div>
+  </div>
+</div>
+
+<div id="miniToolbar">
+  <button id="flipHBtn" title="左右反転">⇋</button>
+  <button id="rotateBtn" title="90°回転">⟳</button>
+</div>
+
+<div id="acquireOverlay">
+  <div id="acquireCard">
+    <div id="acquireLabel">ITEM CHANGED</div>
+    <div id="acquireIconWrap"><img id="acquireIcon" src="" alt="" /></div>
+    <div id="acquireName"></div>
+    <button id="acquireOkBtn">OK</button>
+  </div>
+</div>
+
+<script>
+const ANSWER = 'DECADE';
+let puzzleConditionMet = false;
+
+const strokeW = 7;
+function line(x1,y1,x2,y2) { return { x1, y1, x2, y2 }; }
+
+const glyphs = {};
+glyphs['1'] = [ line(30,10, 30,80) ];
+glyphs['2'] = [ line(10,10,45,10), line(45,10,45,45), line(10,45,45,45), line(10,45,10,80), line(10,80,45,80) ];
+glyphs['3'] = [ line(10,10,45,10), line(45,10,45,45), line(10,45,45,45), line(45,45,45,80), line(10,80,45,80) ];
+glyphs['4'] = [ line(10,10,10,45), line(10,45,45,45), line(45,10,45,80) ];
+glyphs['5'] = [ line(45,10,10,10), line(10,10,10,45), line(10,45,45,45), line(45,45,45,80), line(10,80,45,80) ];
+glyphs['6'] = [ line(45,10,10,10), line(10,10,10,80), line(10,45,45,45), line(45,45,45,80), line(10,80,45,80) ];
+glyphs['7'] = [ line(10,10,45,10), line(45,10,45,80) ];
+glyphs['8'] = [ line(10,10,45,10), line(10,10,10,80), line(45,10,45,80), line(10,45,45,45), line(10,80,45,80) ];
+glyphs['9'] = [ line(10,10,45,10), line(10,10,10,45), line(45,10,45,80), line(10,45,45,45), line(10,80,45,80) ];
+glyphs['0'] = [ line(10,10,45,10), line(10,10,10,80), line(45,10,45,80), line(10,80,45,80) ];
+glyphs['A'] = [ line(10,80,10,30), line(10,30,27,10), line(27,10,45,30), line(45,30,45,80), line(10,45,45,45) ];
+glyphs['B'] = [ line(10,10,10,80), line(10,10,35,10), line(35,10,35,40), line(10,40,35,40), line(10,80,45,80), line(45,80,45,40), line(35,40,45,40) ];
+glyphs['C'] = [ line(45,10,10,10), line(10,10,10,80), line(10,80,45,80) ];
+glyphs['D'] = [ line(10,10,40,10), line(40,10,50,20), line(50,20,50,80), line(10,80,50,80), line(10,10,10,80) ];
+glyphs['E'] = [ line(45,10,10,10), line(10,10,10,80), line(10,80,45,80), line(10,45,40,45) ];
+glyphs['F'] = [ line(45,10,10,10), line(10,10,10,80), line(10,45,40,45) ];
+glyphs['G'] = glyphs['6'];
+glyphs['H'] = [ line(10,10,10,80), line(45,10,45,80), line(10,45,45,45) ];
+glyphs['I'] = [ line(30,10,30,80) ];
+glyphs['J'] = [ line(45,10,45,65), line(45,65,25,80), line(25,80,10,65) ];
+glyphs['K'] = [ line(10,10,10,80), line(10,45,45,10), line(10,45,45,80) ];
+glyphs['L'] = [ line(10,10,10,80), line(10,80,45,80) ];
+glyphs['M'] = [ line(10,10,10,80), line(45,10,45,80), line(10,10,45,10), line(27,10,27,55) ];
+glyphs['N'] = [ line(10,80,10,10), line(10,10,45,80), line(45,80,45,10) ];
+glyphs['O'] = [ line(10,10,45,10), line(10,10,10,80), line(45,10,45,80), line(10,80,45,80) ];
+glyphs['P'] = [ line(10,10,10,80), line(10,10,45,10), line(45,10,45,45), line(10,45,45,45) ];
+glyphs['Q'] = [ line(10,10,45,10), line(10,10,10,70), line(45,10,45,70), line(10,70,45,70), line(35,60,50,80) ];
+glyphs['R'] = [ line(10,10,10,80), line(10,10,45,10), line(45,10,45,45), line(10,45,45,45), line(10,45,45,80) ];
+glyphs['S'] = glyphs['5'];
+glyphs['T'] = [ line(10,10,45,10), line(27,10,27,80) ];
+glyphs['U'] = [ line(10,10,10,80), line(10,80,45,80), line(45,80,45,10) ];
+glyphs['V'] = [ line(10,10,27,80), line(45,10,27,80) ];
+glyphs['W'] = [ line(10,10,10,80), line(45,10,45,80), line(10,80,45,80), line(27,80,27,35) ];
+glyphs['X'] = [ line(10,10,45,80), line(45,10,10,80) ];
+glyphs['Y'] = [ line(10,10,27,45), line(45,10,27,45), line(27,45,27,80) ];
+glyphs['Z'] = [ line(10,10,45,10), line(45,10,10,80), line(10,80,45,80) ];
+
+const glyphDisplay = document.getElementById('glyphDisplay');
+const inputEl = document.getElementById('answerInput');
+const submitBtn = document.getElementById('submitBtn');
+const feedbackEl = document.getElementById('feedback');
+
+function normalize(str) { return str.trim().toUpperCase(); }
+
+function glyphSVG(ch, offsetX, color) {
+  const strokes = glyphs[ch];
+  if (!strokes) return "";
+  let out = "";
+  strokes.forEach(({x1,y1,x2,y2}) => {
+    out += `<line x1="${x1+offsetX}" y1="${y1}" x2="${x2+offsetX}" y2="${y2}" stroke="${color}" stroke-width="${strokeW}" stroke-linecap="round"/>`;
+  });
+  return out;
+}
+
+function renderGlyphs(text) {
+  const color = "#141403";
+  let svgContent = "";
+  const slots = 6;
+  const gap = 14;
+  const digitW = 46;
+  const totalW = slots * digitW + (slots - 1) * gap;
+  const startX = (480 - totalW) / 2;
+  for (let i = 0; i < slots; i++) {
+    const ch = text[i] || "";
+    const offsetX = startX + i * (digitW + gap);
+    svgContent += glyphSVG(ch, offsetX, color);
+  }
+  glyphDisplay.innerHTML = svgContent;
+}
+
+function checkAnswer() {
+  const userAnswer = normalize(inputEl.value);
+  if (!userAnswer) {
+    feedbackEl.textContent = "何か入力してください";
+    feedbackEl.style.background = "transparent";
+    feedbackEl.style.padding = "0";
+    return;
+  }
+  if (userAnswer === ANSWER && puzzleConditionMet) {
+    feedbackEl.textContent = ANSWER + "のボックスが解錠されました。";
+    feedbackEl.style.background = "#B4DDC0";
+    feedbackEl.style.padding = "8px 10px";
+    localStorage.setItem('unlocked_' + ANSWER, 'true');
+  } else {
+    feedbackEl.textContent = "入力されたパスワードに誤りがあります。";
+    feedbackEl.style.background = "#E3B0A6";
+    feedbackEl.style.padding = "8px 10px";
+  }
+}
+
+inputEl.addEventListener('input', () => renderGlyphs(normalize(inputEl.value)));
+submitBtn.addEventListener('click', checkAnswer);
+inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkAnswer(); });
+renderGlyphs("");
+
+// Item drawer toggle
+const itemTab = document.getElementById('itemTab');
+const itemDrawer = document.getElementById('itemDrawer');
+itemTab.addEventListener('click', () => {
+  itemDrawer.classList.toggle('open');
+  itemTab.textContent = itemDrawer.classList.contains('open') ? 'v' : '^';
+});
+
+// Back button: return to the room
+document.getElementById('backBtn').addEventListener('click', () => {
+  window.location.href = 'room.html';
+});
+
+// ---- Inventory (shared with room.html via localStorage) ----
+function getInventory() {
+  try {
+    const raw = localStorage.getItem('inventory');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+function saveInventory(items) {
+  localStorage.setItem('inventory', JSON.stringify(items));
+}
+
+// Render the inventory into the 5 item slots (index-aligned with the array)
+function renderItemSlots() {
+  const slots = Array.from(document.querySelectorAll('.item-slot'));
+  const inv = getInventory();
+  slots.forEach((slot, i) => {
+    const item = inv[i];
+    if (item) {
+      slot.classList.add('filled');
+      slot.dataset.itemId = item.id;
+      slot.dataset.itemIndex = i;
+      slot.innerHTML = `<img src="${item.imgSrc}" alt="${item.label}" style="transform: ${transformFor(item)};" />`;
+    } else {
+      slot.classList.remove('filled');
+      slot.removeAttribute('data-item-id');
+      slot.removeAttribute('data-item-index');
+      slot.innerHTML = '';
+    }
+  });
+}
+
+// Build a CSS transform string from an item's stored flip/rotate state
+function transformFor(item) {
+  const flipH = item.flipH ? -1 : 1;
+  const flipV = item.flipV ? -1 : 1;
+  const rot = item.rotate || 0;
+  return `scale(${flipH}, ${flipV}) rotate(${rot}deg)`;
+}
+
+// ---- Selection system: tap an item (in the drawer or placed on the puzzle)
+// to select it. A mini toolbar (flip/rotate) appears near it. While selected,
+// tapping elsewhere places/moves it there; tapping the item drawer returns it
+// to inventory (if it was placed on the puzzle).
+const miniToolbar = document.getElementById('miniToolbar');
+let selected = null; // { source: 'inventory', index } or { source: 'placed', placedIndex }
+
+function getSelectedItem() {
+  if (!selected) return null;
+  if (selected.source === 'inventory') return getInventory()[selected.index];
+  if (selected.source === 'placed') return getPlacedItems()[selected.placedIndex];
+  return null;
+}
+
+function positionToolbarNear(el) {
+  const rect = el.getBoundingClientRect();
+  miniToolbar.style.left = (rect.left + rect.width / 2 - 60) + 'px';
+  miniToolbar.style.top = (rect.top - 50) + 'px';
+  miniToolbar.classList.add('open');
+}
+
+function clearSelection() {
+  selected = null;
+  miniToolbar.classList.remove('open');
+  placementArea.classList.remove('armed');
+  document.querySelectorAll('.item-slot.selected').forEach(s => s.classList.remove('selected'));
+  document.querySelectorAll('.placed-item.selected').forEach(s => s.classList.remove('selected'));
+  itemDrawer.classList.remove('return-target');
+}
+
+function selectFromInventory(index, slotEl) {
+  selected = { source: 'inventory', index };
+  document.querySelectorAll('.item-slot.selected').forEach(s => s.classList.remove('selected'));
+  slotEl.classList.add('selected');
+  placementArea.classList.add('armed');
+  itemDrawer.classList.add('return-target');
+  positionToolbarNear(slotEl);
+}
+
+function selectPlaced(placedIndex, el) {
+  selected = { source: 'placed', placedIndex };
+  document.querySelectorAll('.placed-item.selected').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  placementArea.classList.add('armed');
+  itemDrawer.classList.add('return-target');
+  positionToolbarNear(el);
+}
+
+document.getElementById('itemSlots').addEventListener('click', (e) => {
+  const slot = e.target.closest('.item-slot');
+  if (!slot || !slot.classList.contains('filled')) return;
+  selectFromInventory(Number(slot.dataset.itemIndex), slot);
+});
+
+// Tapping the (open) item drawer while something is selected returns it to inventory
+itemDrawer.addEventListener('click', (e) => {
+  if (!selected) return;
+  if (e.target.closest('.item-slot')) return; // handled above
+  if (selected.source !== 'placed') return;
+
+  const placed = getPlacedItems();
+  const item = placed[selected.placedIndex];
+  if (!item) { clearSelection(); return; }
+
+  const inv = getInventory();
+  if (inv.length >= 5) {
+    console.warn('Inventory is full; cannot return item.');
+    return;
+  }
+  const { xPct, yPct, ...itemData } = item;
+  inv.push(itemData);
+  placed.splice(selected.placedIndex, 1);
+  saveInventory(inv);
+  savePlacedItems(placed);
+  renderItemSlots();
+  renderPlacedItems();
+  clearSelection();
+  checkPuzzleSolved();
+});
+
+document.getElementById('flipHBtn').addEventListener('click', () => {
+  const item = getSelectedItem();
+  if (!item) return;
+  item.flipH = !item.flipH;
+  if (selected.source === 'inventory') {
+    const inv = getInventory(); inv[selected.index] = item; saveInventory(inv); renderItemSlots();
+  } else {
+    const placed = getPlacedItems(); placed[selected.placedIndex] = item; savePlacedItems(placed); renderPlacedItems();
+  }
+  reselectAfterRerender();
+  checkPuzzleSolved();
+});
+
+document.getElementById('rotateBtn').addEventListener('click', () => {
+  const item = getSelectedItem();
+  if (!item) return;
+  item.rotate = ((item.rotate || 0) + 90) % 360;
+  if (selected.source === 'inventory') {
+    const inv = getInventory(); inv[selected.index] = item; saveInventory(inv); renderItemSlots();
+  } else {
+    const placed = getPlacedItems(); placed[selected.placedIndex] = item; savePlacedItems(placed); renderPlacedItems();
+  }
+  reselectAfterRerender();
+  checkPuzzleSolved();
+});
+
+// After re-rendering slots/placed items, the DOM elements are recreated;
+// re-apply the "selected" highlight and reposition the toolbar.
+function reselectAfterRerender() {
+  if (!selected) return;
+  if (selected.source === 'inventory') {
+    const slot = document.querySelector(`.item-slot[data-item-index="${selected.index}"]`);
+    if (slot) { slot.classList.add('selected'); positionToolbarNear(slot); }
+  } else {
+    const el = placementArea.querySelectorAll('.placed-item')[selected.placedIndex];
+    if (el) { el.classList.add('selected'); positionToolbarNear(el); }
+  }
+}
+
+// ---- Free placement system: works on both mouse and touch ----
+// Placed items are stored per-puzzle in localStorage as an array of
+// { id, imgSrc, label, flipH, flipV, rotate, xPct, yPct }.
+const PLACED_KEY = 'placed_' + ANSWER;
+
+function getPlacedItems() {
+  try {
+    const raw = localStorage.getItem(PLACED_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+function savePlacedItems(items) {
+  localStorage.setItem(PLACED_KEY, JSON.stringify(items));
+}
+
+const placementArea = document.getElementById('placementArea');
+
+// ---- Paint zone: tapping here with the brush selected turns it red ----
+const PAINT_ZONE_X = 72;
+const PAINT_ZONE_Y = 25;
+const PAINT_ZONE_RADIUS = 20; // percent tolerance (loosened for easier calibration)
+
+function isInPaintZone(xPct, yPct) {
+  return Math.abs(xPct - PAINT_ZONE_X) < PAINT_ZONE_RADIUS &&
+         Math.abs(yPct - PAINT_ZONE_Y) < PAINT_ZONE_RADIUS;
+}
+
+// Turn the currently-selected brush into the red brush, wherever it currently lives
+// (inventory or already placed on the puzzle), and show a short "item changed" overlay.
+function paintBrushRed() {
+  if (!selected) return;
+
+  if (selected.source === 'inventory') {
+    const inv = getInventory();
+    const item = inv[selected.index];
+    if (!item || item.id !== 'brush') return;
+    item.id = 'red-brush';
+    item.imgSrc = 'brush-red.png';
+    item.label = '赤い筆';
+    saveInventory(inv);
+    renderItemSlots();
+  } else if (selected.source === 'placed') {
+    const placed = getPlacedItems();
+    const item = placed[selected.placedIndex];
+    if (!item || item.id !== 'brush') return;
+    item.id = 'red-brush';
+    item.imgSrc = 'brush-red.png';
+    item.label = '赤い筆';
+    savePlacedItems(placed);
+    renderPlacedItems();
+    checkPuzzleSolved();
+  }
+
+  clearSelection();
+  showItemChanged('brush-red.png', '赤い筆');
+}
+
+// ---- Item-changed overlay ----
+function showItemChanged(imgSrc, label) {
+  const overlay = document.getElementById('acquireOverlay');
+  document.getElementById('acquireIcon').src = imgSrc;
+  document.getElementById('acquireIcon').alt = label;
+  document.getElementById('acquireName').textContent = label + ' を手に入れた';
+  overlay.classList.add('open');
+}
+document.getElementById('acquireOkBtn').addEventListener('click', () => {
+  document.getElementById('acquireOverlay').classList.remove('open');
+});
+
+// Tapping the placement area places/moves the currently selected item there,
+// unless the selected item is the brush and the tap lands in the paint zone.
+placementArea.addEventListener('click', (e) => {
+  if (e.target.closest('.placed-item')) return; // handled separately below
+  if (!selected) return;
+
+  const rect = placementArea.getBoundingClientRect();
+  const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+  const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+
+  // Check for the "paint the brush red" interaction first
+  const selItem = getSelectedItem();
+  if (selItem && selItem.id === 'brush' && isInPaintZone(xPct, yPct)) {
+    paintBrushRed();
+    return;
+  }
+
+  const placed = getPlacedItems();
+
+  if (selected.source === 'inventory') {
+    const inv = getInventory();
+    const item = inv[selected.index];
+    if (!item) { clearSelection(); return; }
+    placed.push({ ...item, xPct, yPct });
+    inv.splice(selected.index, 1);
+    saveInventory(inv);
+    renderItemSlots();
+  } else if (selected.source === 'placed') {
+    placed[selected.placedIndex].xPct = xPct;
+    placed[selected.placedIndex].yPct = yPct;
+  }
+
+  savePlacedItems(placed);
+  clearSelection();
+  renderPlacedItems();
+  checkPuzzleSolved();
+  showDebugCoords(xPct, yPct);
+});
+
+// Render all placed items as free-floating elements over the puzzle image
+function renderPlacedItems() {
+  placementArea.querySelectorAll('.placed-item').forEach(el => el.remove());
+  const placed = getPlacedItems();
+  placed.forEach((item, i) => {
+    const el = document.createElement('div');
+    el.className = 'placed-item';
+    el.style.left = item.xPct + '%';
+    el.style.top = item.yPct + '%';
+    el.innerHTML = `<img src="${item.imgSrc}" alt="${item.label}" style="transform: ${transformFor(item)};" />`;
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectPlaced(i, el);
+    });
+    placementArea.appendChild(el);
+  });
+}
+
+// ---- Puzzle-specific solved condition ----
+// DECADE: the "brush" item must be placed near a target spot on the image,
+// running through 小/中/十 to complete 小豆/中指/十年.
+// Target coordinates are approximate percentages within the puzzle image.
+const TARGET_X = 30;
+const TARGET_Y = 50;
+const TARGET_RADIUS = 15; // percent tolerance (loosened for easier calibration)
+
+function checkPuzzleSolved() {
+  const placed = getPlacedItems();
+  const correct = placed.some(item =>
+    (item.id === 'brush' || item.id === 'red-brush') &&
+    Math.abs(item.xPct - TARGET_X) < TARGET_RADIUS &&
+    Math.abs(item.yPct - TARGET_Y) < TARGET_RADIUS
+  );
+  puzzleConditionMet = correct;
+}
+
+function showDebugCoords(x, y) {
+  const el = document.getElementById('debugCoords');
+  el.textContent = `x: ${x.toFixed(1)}%  y: ${y.toFixed(1)}%`;
+  el.style.display = 'block';
+}
+
+renderItemSlots();
+renderPlacedItems();
+checkPuzzleSolved();
+</script>
+
+</body>
+</html>
