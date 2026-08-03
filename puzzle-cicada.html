@@ -310,6 +310,22 @@
 const ANSWER = 'CICADA';
 let puzzleConditionMet = false;
 
+// ---- Item display scale: keeps each item's on-screen size consistent
+// across every puzzle page, regardless of which page it's viewed on.
+// Base placed-item width is 9% of the puzzle image; these are multipliers.
+const ITEM_SCALE = {
+  'two-panel': 1,
+  'brush': 2.2,
+  'red-brush': 2.2,
+  'circle-panel': 1,
+  'triangle-panel': 1,
+  'square-panel': 1,
+  'redink': 1
+};
+function scaleFor(id) {
+  return ITEM_SCALE[id] || 1;
+}
+
 const strokeW = 7;
 function line(x1,y1,x2,y2) { return { x1, y1, x2, y2 }; }
 
@@ -641,6 +657,7 @@ function renderPlacedItems() {
     el.className = 'placed-item';
     el.style.left = item.xPct + '%';
     el.style.top = item.yPct + '%';
+    el.style.width = (9 * scaleFor(item.id)) + '%';
     el.innerHTML = `<img src="${item.imgSrc}" alt="${item.label}" style="transform: ${transformFor(item)};" />`;
     el.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -654,9 +671,9 @@ function renderPlacedItems() {
 // CICADA: the "two-panel" item must be placed near a target spot on the image,
 // flipped horizontally (so the "2" reads as a "5"), for "祝い＋5＝イワシ" to hold.
 // Target coordinates are approximate percentages within the puzzle image.
-const TARGET_X = 41;
-const TARGET_Y = 59;
-const TARGET_RADIUS = 5; // percent tolerance (loosened for easier calibration)
+const TARGET_X = 38;
+const TARGET_Y = 62;
+const TARGET_RADIUS = 15; // percent tolerance (loosened for easier calibration)
 
 function checkPuzzleSolved() {
   const placed = getPlacedItems();
