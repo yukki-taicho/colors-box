@@ -385,7 +385,7 @@ let puzzleConditionMet = false;
 const ITEM_SCALE = {
   'two-panel': 1,
   'brush': 0.66,
-  'red-brush': 　0.66,
+  'red-brush': 0.66,
   'circle-panel': 1,
   'triangle-panel': 1,
   'square-panel': 1,
@@ -695,13 +695,6 @@ placementArea.addEventListener('click', (e) => {
   const rect = placementArea.getBoundingClientRect();
   const xPct = ((e.clientX - rect.left) / rect.width) * 100;
   const yPct = ((e.clientY - rect.top) / rect.height) * 100;
-
-  // Check for the "paint the brush red" interaction first
-  const selItem = getSelectedItem();
-  if (selItem && selItem.id === 'brush' && isInPaintZone(xPct, yPct)) {
-    paintBrushRed();
-    return;
-  }
 
   const placed = getPlacedItems();
 
