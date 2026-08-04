@@ -450,7 +450,17 @@ function showNextAcquire() {
 
 document.getElementById('acquireOkBtn').addEventListener('click', showNextAcquire);
 
+const ITEM_SCALE = {
+  'two-panel': 1,
+  'brush': 0.66,
+  'red-brush': 0.66,
+  'circle-panel': 1,
+  'triangle-panel': 1,
+  'square-panel': 1
+};
+  
 // ---- Item slot rendering: reflects the saved inventory, left to right ----
+
 function renderItemSlots() {
   const slots = Array.from(document.querySelectorAll('.item-slot'));
   const inv = getInventory();
@@ -458,7 +468,17 @@ function renderItemSlots() {
     const item = inv[i];
     if (item) {
       slot.classList.add('filled');
-      slot.innerHTML = `<img src="${item.imgSrc}" alt="${item.label}" />`;
+      const scale = ITEM_SCALE[item.id] ?? 1;
+      slot.innerHTML = `
+        <img
+          src="${item.imgSrc}"
+          alt="${item.label}"
+          style="
+            width: ${70 * scale}%;
+            height: ${70 * scale}%;
+            object-fit: contain;
+          "
+        `;
     } else {
       slot.classList.remove('filled');
       slot.innerHTML = '';
