@@ -628,6 +628,18 @@ function isInPaintZone(xPct, yPct) {
     Math.abs(yPct - PAINT_Y) < PAINT_R
   );
 }
+
+function showItemChanged(imgSrc, label) {
+  const overlay = document.getElementById('acquireOverlay');
+  document.getElementById('acquireIcon').src = imgSrc;
+  document.getElementById('acquireIcon').alt = label;
+  document.getElementById('acquireName').textContent = label + ' を手に入れた';
+  overlay.classList.add('open');
+}
+document.getElementById('acquireOkBtn').addEventListener('click', () => {
+  document.getElementById('acquireOverlay').classList.remove('open');
+});
+ 
 function paintBrushRed() {
   if (!selected) return;
 
