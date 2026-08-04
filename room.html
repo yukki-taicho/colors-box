@@ -35,21 +35,26 @@
     width: 100%;
     z-index: -1;
   }
-  #resetBtn {
-    position: absolute;
-    top: 12px; right: 12px;
-    z-index: 20;
-    padding: 6px 10px;
-    border-radius: 8px;
-    background: rgba(16,16,19,0.7);
-    border: 1px solid var(--line);
-    color: var(--text-muted);
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-  }
-  #resetBtn:hover { background: rgba(38,38,46,0.9); color: var(--text-primary); }
+  #rulesBtn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 20;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(16,16,19,0.7);
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+#rulesBtn:hover {
+  background: rgba(38,38,46,0.9);
+  color: var(--text-primary);
+}
   #eyebrow {
     font-family: var(--mono);
     font-size: 11px;
@@ -188,7 +193,7 @@
 </head>
 <body>
 
-<button id="resetBtn">RESET</button>
+<button id="rulesBtn">RULES</button>
 
 <div id="acquireOverlay">
   <div id="acquireCard">
@@ -470,6 +475,10 @@ if (isItemTaken('ACACIA')) revealFinalBox();
 document.getElementById('resetBtn').addEventListener('click', () => {
   localStorage.clear();
   location.reload();
+});
+
+document.getElementById('rulesBtn').addEventListener('click', () => {
+    window.location.href = 'rules.html';
 });
 </script>
 
