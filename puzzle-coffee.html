@@ -667,58 +667,6 @@ function renderPlacedItems() {
   });
 }
 
-// ---- Paint zone: tapping here with the brush selected turns it red ----
-const PAINT_ZONE_X = 21;
-const PAINT_ZONE_Y = 83;
-const PAINT_ZONE_RADIUS = 20; // percent tolerance (loosened for easier calibration)
-
-function isInPaintZone(xPct, yPct) {
-  return Math.abs(xPct - PAINT_ZONE_X) < PAINT_ZONE_RADIUS &&
-         Math.abs(yPct - PAINT_ZONE_Y) < PAINT_ZONE_RADIUS;
-}
-
-// Turn the currently-selected brush into the red brush, wherever it currently lives
-// (inventory or already placed on the puzzle), and show a short "item changed" overlay.
-function paintBrushRed() {
-  if (!selected) return;
-
-  if (selected.source === 'inventory') {
-    const inv = getInventory();
-    const item = inv[selected.index];
-    if (!item || item.id !== 'brush') return;
-    item.id = 'red-brush';
-    item.imgSrc = 'brush-red.png';
-    item.label = '赤い筆';
-    saveInventory(inv);
-    renderItemSlots();
-  } else if (selected.source === 'placed') {
-    const placed = getPlacedItems();
-    const item = placed[selected.placedIndex];
-    if (!item || item.id !== 'brush') return;
-    item.id = 'red-brush';
-    item.imgSrc = 'brush-red.png';
-    item.label = '赤い筆';
-    savePlacedItems(placed);
-    renderPlacedItems();
-    checkPuzzleSolved();
-  }
-
-  clearSelection();
-  showItemChanged('brush-red.png', '赤い筆');
-}
-
-// ---- Item-changed overlay ----
-function showItemChanged(imgSrc, label) {
-  const overlay = document.getElementById('acquireOverlay');
-  document.getElementById('acquireIcon').src = imgSrc;
-  document.getElementById('acquireIcon').alt = label;
-  document.getElementById('acquireName').textContent = label + ' を手に入れた';
-  overlay.classList.add('open');
-}
-document.getElementById('acquireOkBtn').addEventListener('click', () => {
-  document.getElementById('acquireOverlay').classList.remove('open');
-});
-
 // ---- Puzzle-specific solved condition ----
 // COFFEE: the "two-panel" item (flipped, reading as "5") and the "circle-panel"
 // item must both be placed near their target spots on the image, to complete
