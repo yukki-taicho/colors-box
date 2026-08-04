@@ -220,66 +220,6 @@
     outline-offset: -4px;
   }
 
-  /* ---- Item-transformed overlay (e.g. brush -> red brush) ---- */
-  #acquireOverlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 300;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  #acquireOverlay.open { display: flex; opacity: 1; }
-  #acquireCard {
-    background: #1d1d22;
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 32px 28px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    max-width: 280px;
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
-  }
-  #acquireOverlay.open #acquireCard { transform: scale(1); }
-  #acquireIconWrap {
-    width: 100px; height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #acquireIconWrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
-  #acquireLabel {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    color: var(--text-muted);
-    text-transform: uppercase;
-  }
-  #acquireName {
-    font-family: var(--jp);
-    font-size: 16px;
-    font-weight: 700;
-    text-align: center;
-  }
-  #acquireOkBtn {
-    margin-top: 8px;
-    padding: 10px 24px;
-    border-radius: 8px;
-    border: 1px solid var(--line);
-    background: #26262e;
-    color: var(--text-primary);
-    font-family: var(--mono);
-    font-size: 12px;
-    cursor: pointer;
-  }
-  #acquireOkBtn:hover { background: #2f2f39; }
-
   /* ---- Free placement area on the puzzle image ---- */
   #placementArea {
     position: absolute;
@@ -364,15 +304,6 @@
 <div id="miniToolbar">
   <button id="flipHBtn" title="左右反転">⇋</button>
   <button id="rotateBtn" title="90°回転">⟳</button>
-</div>
-
-<div id="acquireOverlay">
-  <div id="acquireCard">
-    <div id="acquireLabel">ITEM CHANGED</div>
-    <div id="acquireIconWrap"><img id="acquireIcon" src="" alt="" /></div>
-    <div id="acquireName"></div>
-    <button id="acquireOkBtn">OK</button>
-  </div>
 </div>
 
 <script>
