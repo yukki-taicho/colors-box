@@ -658,7 +658,6 @@ placementArea.addEventListener('click', (e) => {
   clearSelection();
   renderPlacedItems();
   checkPuzzleSolved();
-  showDebugCoords(xPct, yPct);
 });
 
 // Render all placed items as free-floating elements over the puzzle image
@@ -697,12 +696,6 @@ function checkPuzzleSolved() {
     Math.abs(item.yPct - TARGET_Y) < TARGET_RADIUS
   );
   puzzleConditionMet = correct;
-}
-
-function showDebugCoords(x, y) {
-  const el = document.getElementById('debugCoords');
-  el.textContent = `x: ${x.toFixed(1)}%  y: ${y.toFixed(1)}%`;
-  el.style.display = 'block';
 }
 
 renderItemSlots();
