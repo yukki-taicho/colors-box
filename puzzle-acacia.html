@@ -315,8 +315,8 @@ let puzzleConditionMet = false;
 // Base placed-item width is 9% of the puzzle image; these are multipliers.
 const ITEM_SCALE = {
   'two-panel': 1,
-  'brush': 1,
-  'red-brush': 1,
+  'brush': 0.66,
+  'red-brush': 0.66,
   'circle-panel': 1,
   'triangle-panel': 1,
   'square-panel': 1,
@@ -626,6 +626,34 @@ placementArea.addEventListener('click', (e) => {
   const xPct = ((e.clientX - rect.left) / rect.width) * 100;
   const yPct = ((e.clientY - rect.top) / rect.height) * 100;
 
+  const item = getSelectedItem();
+
+// 赤い筆をロシアの「ロ」に使った場合
+if (
+    item &&
+    item.id === "red-brush" &&
+    Math.abs(xPct - RED_TARGET_X) < RED_TARGET_RADIUS &&
+    Math.abs(yPct - RED_TARGET_Y) < RED_TARGET_RADIUS
+) {
+    // インベントリから削除
+    if (selected.source === "inventory") {
+        const inv = getInventory();
+        inv.splice(selected.index, 1);
+        saveInventory(inv);
+        renderItemSlots();
+    }
+    // 配置済みなら削除
+    if (selected.source === "placed") {
+        const placed = getPlacedItems();
+        placed.splice(selected.placedIndex, 1);
+        savePlacedItems(placed);
+        renderPlacedItems();
+    }
+    clearSelection();
+    applyRedBrush();
+    return;
+}
+
   const placed = getPlacedItems();
 
   if (selected.source === 'inventory') {
@@ -647,6 +675,12 @@ placementArea.addEventListener('click', (e) => {
   checkPuzzleSolved();
   showDebugCoords(xPct, yPct);
 });
+
+function applyRedBrush() {
+  document.getElementById("puzzleImg").src = "puzzle-acacia-red.png";
+  puzzleConditionMet = true;
+  localStorage.setItem("acacia_red", "true");
+}
 
 // Render all placed items as free-floating elements over the puzzle image
 function renderPlacedItems() {
@@ -676,6 +710,9 @@ const TARGET_TRIANGLE_X = 30;
 const TARGET_TRIANGLE_Y = 40;
 const TARGET_SQUARE_X = 30;
 const TARGET_SQUARE_Y = 70;
+const RED_TARGET_X = 12;
+const RED_TARGET_Y = 69;
+const RED_TARGET_RADIUS = 10;
 const TARGET_RADIUS = 15; // percent tolerance (loosened for easier calibration)
 
 function checkPuzzleSolved() {
@@ -690,6 +727,11 @@ function checkPuzzleSolved() {
     Math.abs(item.xPct - TARGET_SQUARE_X) < TARGET_RADIUS &&
     Math.abs(item.yPct - TARGET_SQUARE_Y) < TARGET_RADIUS
   );
+  
+  puzzleConditionMet =
+      (triangleOk && squareOk) ||
+      localStorage.getItem("acacia_red") === "true";
+}
   puzzleConditionMet = triangleOk && squareOk;
 }
 
@@ -699,6 +741,11 @@ function showDebugCoords(x, y) {
   el.style.display = 'block';
 }
 
+if (localStorage.getItem("acacia_red") === "true") {
+  document.getElementById("puzzleImg").src = "puzzle-acacia-red.png";
+  puzzleConditionMet = true;
+}
+  
 renderItemSlots();
 renderPlacedItems();
 checkPuzzleSolved();
