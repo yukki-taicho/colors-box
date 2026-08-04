@@ -90,6 +90,17 @@
     transition: background 0.2s ease, padding 0.2s ease;
   }
   #feedbackWrap { text-align: center; }
+
+  #whiteFlash{
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 3s linear;
+}
+  
 </style>
 </head>
 <body>
@@ -111,6 +122,9 @@
   </div>
 
   <div id="feedbackWrap"><div id="feedback"></div></div>
+</div>
+
+ <div id="whiteFlash">
 </div>
 
 <script>
@@ -200,11 +214,19 @@ function checkAnswer() {
   }
   if (userAnswer === ANSWER) {
     localStorage.setItem('unlocked_' + ANSWER, 'true');
+    // 入力を触れなくする
+    inputEl.disabled = true;
+    submitBtn.disabled = true;
 
     setTimeout(() => {
-    window.location.href = "clear.html";
-  }, 500);   // 0.5秒後に移動
-} 
+    document.getElementById("whiteFlash").style.opacity = "1";
+　　　}, 800);
+
+    // 3秒後にクリア画面へ
+    setTimeout(() => {
+        window.location.replace("clear.html");
+    }, 3000);
+}
   else {
     feedbackEl.textContent = "入力されたパスワードに誤りがあります。";
     feedbackEl.style.background = "#E3B0A6";
