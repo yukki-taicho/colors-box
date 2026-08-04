@@ -707,6 +707,18 @@ function paintBrushRed() {
   showItemChanged('brush-red.png', '赤い筆');
 }
 
+// ---- Item-changed overlay ----
+function showItemChanged(imgSrc, label) {
+  const overlay = document.getElementById('acquireOverlay');
+  document.getElementById('acquireIcon').src = imgSrc;
+  document.getElementById('acquireIcon').alt = label;
+  document.getElementById('acquireName').textContent = label + ' を手に入れた';
+  overlay.classList.add('open');
+}
+document.getElementById('acquireOkBtn').addEventListener('click', () => {
+  document.getElementById('acquireOverlay').classList.remove('open');
+});
+
 // ---- Puzzle-specific solved condition ----
 // COFFEE: the "two-panel" item (flipped, reading as "5") and the "circle-panel"
 // item must both be placed near their target spots on the image, to complete
