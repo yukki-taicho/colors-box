@@ -314,7 +314,7 @@ let puzzleConditionMet = false;
 // across every puzzle page, regardless of which page it's viewed on.
 // Base placed-item width is 9% of the puzzle image; these are multipliers.
 const ITEM_SCALE = {
-  'two-panel': 1,
+  'two-panel': 0.8,
   'brush': 1,
   'red-brush': 1,
   'circle-panel': 1,
@@ -672,10 +672,10 @@ function renderPlacedItems() {
 // item must both be placed near their target spots on the image, to complete
 // the picture-shiritori puzzle (5th item in the chain).
 // Target coordinates are approximate percentages within the puzzle image.
-const TARGET_TWO_X = 35;
-const TARGET_TWO_Y = 40;
-const TARGET_CIRCLE_X = 60;
-const TARGET_CIRCLE_Y = 60;
+const TARGET_TWO_X = 62;
+const TARGET_TWO_Y = 13;
+const TARGET_CIRCLE_X = 52;
+const TARGET_CIRCLE_Y = 40;
 const TARGET_RADIUS = 15; // percent tolerance (loosened for easier calibration)
 
 function checkPuzzleSolved() {
