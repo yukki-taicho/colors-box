@@ -617,6 +617,56 @@ function savePlacedItems(items) {
 
 const placementArea = document.getElementById('placementArea');
 
+// 赤い絵の具がある場所（％座標）
+function isInPaintZone(xPct, yPct) {
+  const PAINT_X = 74;
+  const PAINT_Y = 70;
+  const PAINT_R = 10;
+
+  return (
+    Math.abs(xPct - PAINT_X) < PAINT_R &&
+    Math.abs(yPct - PAINT_Y) < PAINT_R
+  );
+}
+function paintBrushRed() {
+  if (!selected) return;
+
+  if (selected.source === 'inventory') {
+    const inv = getInventory();
+    const item = inv[selected.index];
+
+    if (!item || item.id !== 'brush') return;
+
+    item.id = 'red-brush';
+    item.imgSrc = 'brush-red.png';
+    item.label = '赤い筆';
+
+    saveInventory(inv);
+    renderItemSlots();
+
+  } else if (selected.source === 'placed') {
+
+    const placed = getPlacedItems();
+    const item = placed[selected.placedIndex];
+
+    if (!item || item.id !== 'brush') return;
+
+    item.id = 'red-brush';
+    item.imgSrc = 'brush-red.png';
+    item.label = '赤い筆';
+
+    savePlacedItems(placed);
+    checkPuzzleSolved();
+  }
+
+  clearSelection();
+  renderPlacedItems();
+
+  // 必要ならメッセージ表示
+  showItemChanged('brush-red.png', '赤い筆');
+}
+　
+
 // Tapping the placement area places/moves the currently selected item there
 placementArea.addEventListener('click', (e) => {
   if (e.target.closest('.placed-item')) return; // handled separately below
@@ -625,6 +675,17 @@ placementArea.addEventListener('click', (e) => {
   const rect = placementArea.getBoundingClientRect();
   const xPct = ((e.clientX - rect.left) / rect.width) * 100;
   const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+
+  const selItem = getSelectedItem();
+
+if (
+  selItem &&
+  selItem.id === 'brush' &&
+  isInPaintZone(xPct, yPct)
+) {
+  paintBrushRed();
+  return;
+}
 
   const placed = getPlacedItems();
 
