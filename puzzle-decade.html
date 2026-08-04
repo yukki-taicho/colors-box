@@ -425,6 +425,19 @@ submitBtn.addEventListener('click', checkAnswer);
 inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkAnswer(); });
 renderGlyphs("");
 
+const savedAnswer = localStorage.getItem('answer_' + ANSWER);
+if (savedAnswer) {
+    inputEl.value = savedAnswer;
+    renderGlyphs(savedAnswer);
+} else {
+    renderGlyphs("");
+}
+// 解いた問題は編集不可
+if (localStorage.getItem('unlocked_' + ANSWER) === 'true') {
+    inputEl.disabled = true;
+    submitBtn.disabled = true;
+}
+
 // Item drawer toggle
 const itemTab = document.getElementById('itemTab');
 const itemDrawer = document.getElementById('itemDrawer');
