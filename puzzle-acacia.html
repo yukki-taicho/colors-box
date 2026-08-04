@@ -732,8 +732,6 @@ function checkPuzzleSolved() {
       (triangleOk && squareOk) ||
       localStorage.getItem("acacia_red") === "true";
 }
-  puzzleConditionMet = triangleOk && squareOk;
-}
 
 function showDebugCoords(x, y) {
   const el = document.getElementById('debugCoords');
