@@ -199,11 +199,13 @@ function checkAnswer() {
     return;
   }
   if (userAnswer === ANSWER) {
-    feedbackEl.textContent = ANSWER + "のボックスが解錠されました。";
-    feedbackEl.style.background = "#B4DDC0";
-    feedbackEl.style.padding = "8px 10px";
     localStorage.setItem('unlocked_' + ANSWER, 'true');
-  } else {
+
+    setTimeout(() => {
+    window.location.href = "clear.html";
+  }, 500);   // 0.5秒後に移動
+} 
+  else {
     feedbackEl.textContent = "入力されたパスワードに誤りがあります。";
     feedbackEl.style.background = "#E3B0A6";
     feedbackEl.style.padding = "8px 10px";
