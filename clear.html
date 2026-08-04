@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLEAR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --line: #dcdcdc;
+    --text-primary: #1a1a1a;
+    --text-muted: #999;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; width: 100%; overflow: hidden; }
+  body {
+    background: #ffffff;
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+  }
+  .section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #titleSection { flex: 0.7; align-items: flex-end; padding-bottom: 8px; }
+  #boxSection { flex: 1.3; }
+  #startSection { flex: 1; }
+  #titleGlyph { width: 92%; max-width: 640px; height: auto; }
+  #startSection button {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 40px;
+    color: var(--text-primary);
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  #startSection button:hover {
+    background: #f2f2f2;
+  }
+</style>
+</head>
+<body>
+
+<div class="section" id="titleSection">
+  <svg id="titleGlyph" viewBox="0 0 480 90"></svg>
+</div>
+
+<div class="section" id="boxSection">
+  <svg viewBox="0 0 240 200" fill="none" style="width:45%; max-width:220px; height:auto;">
+    <g transform="translate(18, 0)">
+      <polygon points="30,90 130,90 130,170 30,170" fill="#f0f0f0" fill-opacity="1" stroke="#c8c8c8" stroke-width="5" stroke-linejoin="round"/>
+      <polygon points="130,90 165,70 165,150 130,170" fill="#e2e2e2" fill-opacity="1" stroke="#c8c8c8" stroke-width="5" stroke-linejoin="round"/>
+      <polygon points="30,90 65,70 165,70 130,90" fill="#3a3a3a" stroke="#c8c8c8" stroke-width="5" stroke-linejoin="round"/>
+    </g>
+  </svg>
+</div>
+
+<div class="section" id="startSection">
+  <button id="backBtn">BACK</button>
+</div>
+
+<script>
+const strokeW = 7;
+function line(x1,y1,x2,y2) { return { x1, y1, x2, y2 }; }
+
+const glyphs = {};
+glyphs['A'] = [ line(10,80,10,30), line(10,30,27,10), line(27,10,45,30), line(45,30,45,80), line(10,45,45,45) ];
+glyphs['C'] = [ line(45,10,10,10), line(10,10,10,80), line(10,80,45,80) ];
+glyphs['D'] = [ line(10,10,40,10), line(40,10,50,20), line(50,20,50,80), line(10,80,50,80), line(10,10,10,80) ];
+glyphs['E'] = [ line(45,10,10,10), line(10,10,10,80), line(10,80,45,80), line(10,45,40,45) ];
+glyphs['G'] = [ line(45,10,10,10), line(10,10,10,80), line(10,45,45,45), line(45,45,45,80), line(10,80,45,80) ];
+glyphs['I'] = [ line(30,10,30,80) ];
+glyphs['L'] = [ line(10,10,10,80), line(10,80,45,80) ];
+glyphs['N'] = [ line(10,80,10,10), line(10,10,45,80), line(45,80,45,10) ];
+glyphs['O'] = [ line(10,10,45,10), line(10,10,10,80), line(45,10,45,80), line(10,80,45,80) ];
+glyphs['R'] = [ line(10,10,10,80), line(10,10,45,10), line(45,10,45,45), line(10,45,45,45), line(10,45,45,80) ];
+glyphs['S'] = [ line(45,10,10,10), line(10,10,10,45), line(10,45,45,45), line(45,45,45,80), line(10,80,45,80) ];
+glyphs['T'] = [ line(10,10,45,10), line(27,10,27,80) ];
+glyphs['U'] = [ line(10,10,10,80), line(10,80,45,80), line(45,80,45,10) ];
+
+function glyphSVG(ch, offsetX, scale) {
+  const strokes = glyphs[ch];
+  if (!strokes) return "";
+  let out = "";
+  strokes.forEach(({x1,y1,x2,y2}) => {
+    out += `<line x1="${(x1*scale)+offsetX}" y1="${y1*scale}" x2="${(x2*scale)+offsetX}" y2="${y2*scale}" stroke="#1a1a1a" stroke-width="${strokeW}" stroke-linecap="round"/>`;
+  });
+  return out;
+}
+
+function renderTitle(text) {
+  const scale = 0.85;
+  const letterW = 46 * scale;
+  const gap = 12 * scale;
+  let x = 0;
+  for (const ch of text) { x += letterW + gap; }
+  const totalW = x - gap;
+  const startX = (480 - totalW) / 2;
+  let centered = "";
+  x = 0;
+  for (const ch of text) {
+    centered += glyphSVG(ch, x + startX, scale);
+    x += letterW + gap;
+  }
+  document.getElementById('titleGlyph').innerHTML = centered;
+}
+
+renderTitle("CLEARED");
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  window.location.href = 'title.html';
+});
+</script>
+
+</body>
+</html>

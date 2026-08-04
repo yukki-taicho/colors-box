@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FFFFFF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mono: 'JetBrains Mono', monospace;
+    --jp: 'Zen Kaku Gothic New', sans-serif;
+    --text-danger: #b3413c;
+    --text-success: #3f7a52;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; width: 100%; }
+  body {
+    font-family: var(--jp);
+    background: #ffffff;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    position: relative;
+  }
+  #backBtn {
+    position: absolute;
+    top: 16px; left: 16px;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: #f2f2f2;
+    border: 1px solid #dcdcdc;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  #backBtn:hover { background: #e6e6e6; }
+  #panel {
+    width: 100%;
+    max-width: 420px;
+    background: #f2f2f2;
+    border: 1px solid #dcdcdc;
+    border-radius: 16px;
+    padding: 1.5rem 1.25rem;
+    box-shadow: 0 20px 60px -30px rgba(0,0,0,0.15);
+  }
+  #eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: #999;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  #glyphDisplay { width: 100%; height: auto; margin-bottom: 20px; display: block; }
+  #inputArea { display: flex; gap: 8px; margin-bottom: 12px; }
+  input[type="text"] {
+    flex: 1; padding: 12px 14px; border-radius: 10px;
+    border: 1px solid #dcdcdc; font-size: 15px;
+    background: #ffffff; color: #1a1a1a;
+    letter-spacing: 2px;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: #bbb; }
+  button.enterBtn {
+    padding: 12px 20px; border-radius: 10px;
+    border: 1px solid #dcdcdc; background: #f2f2f2;
+    font-size: 13px; cursor: pointer; color: #1a1a1a;
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+  button.enterBtn:hover { background: #e6e6e6; }
+  #feedback {
+    min-height: 18px; font-size: 13px;
+    font-family: var(--jp);
+    line-height: 1.5;
+    color: #1a1a1a;
+    border-radius: 6px;
+    display: inline-block;
+    text-align: center;
+    transition: background 0.2s ease, padding 0.2s ease;
+  }
+  #feedbackWrap { text-align: center; }
+</style>
+</head>
+<body>
+
+<button id="backBtn">
+  <svg viewBox="0 0 40 40" width="20" height="20" fill="none">
+    <path d="M 30 26 C 30 18 24 13 16 13 L 11 13" stroke="#1a1a1a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 17 7 L 10 13 L 17 19" stroke="#1a1a1a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<div id="panel">
+  <div id="eyebrow">PASSWORD</div>
+  <svg id="glyphDisplay" viewBox="0 0 480 90"></svg>
+
+  <div id="inputArea">
+    <input id="answerInput" type="text" placeholder="PASSWORD" autocomplete="off" maxlength="6" />
+    <button class="enterBtn" id="submitBtn">Enter</button>
+  </div>
+
+  <div id="feedbackWrap"><div id="feedback"></div></div>
+</div>
+
+<script>
+const ANSWER = 'FFFFFF';
+
+const strokeW = 7;
+function line(x1,y1,x2,y2) { return { x1, y1, x2, y2 }; }
+
+const glyphs = {};
+glyphs['1'] = [ line(30,10, 30,80) ];
+glyphs['2'] = [ line(10,10,45,10), line(45,10,45,45), line(10,45,45,45), line(10,45,10,80), line(10,80,45,80) ];
+glyphs['3'] = [ line(10,10,45,10), line(45,10,45,45), line(10,45,45,45), line(45,45,45,80), line(10,80,45,80) ];
+glyphs['4'] = [ line(10,10,10,45), line(10,45,45,45), line(45,10,45,80) ];
+glyphs['5'] = [ line(45,10,10,10), line(10,10,10,45), line(10,45,45,45), line(45,45,45,80), line(10,80,45,80) ];
+glyphs['6'] = [ line(45,10,10,10), line(10,10,10,80), line(10,45,45,45), line(45,45,45,80), line(10,80,45,80) ];
+glyphs['7'] = [ line(10,10,45,10), line(45,10,45,80) ];
+glyphs['8'] = [ line(10,10,45,10), line(10,10,10,80), line(45,10,45,80), line(10,45,45,45), line(10,80,45,80) ];
+glyphs['9'] = [ line(10,10,45,10), line(10,10,10,45), line(45,10,45,80), line(10,45,45,45), line(10,80,45,80) ];
+glyphs['0'] = [ line(10,10,45,10), line(10,10,10,80), line(45,10,45,80), line(10,80,45,80) ];
+glyphs['A'] = [ line(10,80,10,30), line(10,30,27,10), line(27,10,45,30), line(45,30,45,80), line(10,45,45,45) ];
+glyphs['B'] = [ line(10,10,10,80), line(10,10,35,10), line(35,10,35,40), line(10,40,35,40), line(10,80,45,80), line(45,80,45,40), line(35,40,45,40) ];
+glyphs['C'] = [ line(45,10,10,10), line(10,10,10,80), line(10,80,45,80) ];
+glyphs['D'] = [ line(10,10,40,10), line(40,10,50,20), line(50,20,50,80), line(10,80,50,80), line(10,10,10,80) ];
+glyphs['E'] = [ line(45,10,10,10), line(10,10,10,80), line(10,80,45,80), line(10,45,40,45) ];
+glyphs['F'] = [ line(45,10,10,10), line(10,10,10,80), line(10,45,40,45) ];
+glyphs['G'] = glyphs['6'];
+glyphs['H'] = [ line(10,10,10,80), line(45,10,45,80), line(10,45,45,45) ];
+glyphs['I'] = [ line(30,10,30,80) ];
+glyphs['J'] = [ line(45,10,45,65), line(45,65,25,80), line(25,80,10,65) ];
+glyphs['K'] = [ line(10,10,10,80), line(10,45,45,10), line(10,45,45,80) ];
+glyphs['L'] = [ line(10,10,10,80), line(10,80,45,80) ];
+glyphs['M'] = [ line(10,10,10,80), line(45,10,45,80), line(10,10,45,10), line(27,10,27,55) ];
+glyphs['N'] = [ line(10,80,10,10), line(10,10,45,80), line(45,80,45,10) ];
+glyphs['O'] = [ line(10,10,45,10), line(10,10,10,80), line(45,10,45,80), line(10,80,45,80) ];
+glyphs['P'] = [ line(10,10,10,80), line(10,10,45,10), line(45,10,45,45), line(10,45,45,45) ];
+glyphs['Q'] = [ line(10,10,45,10), line(10,10,10,70), line(45,10,45,70), line(10,70,45,70), line(35,60,50,80) ];
+glyphs['R'] = [ line(10,10,10,80), line(10,10,45,10), line(45,10,45,45), line(10,45,45,45), line(10,45,45,80) ];
+glyphs['S'] = glyphs['5'];
+glyphs['T'] = [ line(10,10,45,10), line(27,10,27,80) ];
+glyphs['U'] = [ line(10,10,10,80), line(10,80,45,80), line(45,80,45,10) ];
+glyphs['V'] = [ line(10,10,27,80), line(45,10,27,80) ];
+glyphs['W'] = [ line(10,10,10,80), line(45,10,45,80), line(10,80,45,80), line(27,80,27,35) ];
+glyphs['X'] = [ line(10,10,45,80), line(45,10,10,80) ];
+glyphs['Y'] = [ line(10,10,27,45), line(45,10,27,45), line(27,45,27,80) ];
+glyphs['Z'] = [ line(10,10,45,10), line(45,10,10,80), line(10,80,45,80) ];
+
+const glyphDisplay = document.getElementById('glyphDisplay');
+const inputEl = document.getElementById('answerInput');
+const submitBtn = document.getElementById('submitBtn');
+const feedbackEl = document.getElementById('feedback');
+
+function normalize(str) { return str.trim().toUpperCase(); }
+
+function glyphSVG(ch, offsetX, color) {
+  const strokes = glyphs[ch];
+  if (!strokes) return "";
+  let out = "";
+  strokes.forEach(({x1,y1,x2,y2}) => {
+    out += `<line x1="${x1+offsetX}" y1="${y1}" x2="${x2+offsetX}" y2="${y2}" stroke="${color}" stroke-width="${strokeW}" stroke-linecap="round"/>`;
+  });
+  return out;
+}
+
+function renderGlyphs(text) {
+  const color = "#1a1a1a";
+  let svgContent = "";
+  const slots = 6;
+  const gap = 14;
+  const digitW = 46;
+  const totalW = slots * digitW + (slots - 1) * gap;
+  const startX = (480 - totalW) / 2;
+  for (let i = 0; i < slots; i++) {
+    const ch = text[i] || "";
+    const offsetX = startX + i * (digitW + gap);
+    svgContent += glyphSVG(ch, offsetX, color);
+  }
+  glyphDisplay.innerHTML = svgContent;
+}
+
+function checkAnswer() {
+  const userAnswer = normalize(inputEl.value);
+  if (!userAnswer) {
+    feedbackEl.textContent = "何か入力してください";
+    feedbackEl.style.background = "transparent";
+    feedbackEl.style.padding = "0";
+    return;
+  }
+  if (userAnswer === ANSWER) {
+    feedbackEl.textContent = ANSWER + "のボックスが解錠されました。";
+    feedbackEl.style.background = "#B4DDC0";
+    feedbackEl.style.padding = "8px 10px";
+    localStorage.setItem('unlocked_' + ANSWER, 'true');
+  } else {
+    feedbackEl.textContent = "入力されたパスワードに誤りがあります。";
+    feedbackEl.style.background = "#E3B0A6";
+    feedbackEl.style.padding = "8px 10px";
+  }
+}
+
+inputEl.addEventListener('input', () => renderGlyphs(normalize(inputEl.value)));
+submitBtn.addEventListener('click', checkAnswer);
+inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkAnswer(); });
+renderGlyphs("");
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  window.location.href = 'room.html';
+});
+</script>
+
+</body>
+</html>
