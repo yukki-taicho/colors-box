@@ -117,8 +117,12 @@ function renderTitle(text) {
 renderTitle("CLEARED");
 
 document.getElementById('backBtn').addEventListener('click', () => {
+  // ゲームデータをリセット
+  localStorage.clear();
+  // タイトルへ戻る
   window.location.href = 'title.html';
 });
+
 </script>
 
 </body>
