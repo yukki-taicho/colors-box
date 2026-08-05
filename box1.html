@@ -315,8 +315,8 @@ let puzzleConditionMet = false;
 // Base placed-item width is 9% of the puzzle image; these are multipliers.
 const ITEM_SCALE = {
   'two-panel': 1,
-  'brush': 1,
-  'red-brush': 1,
+  'brush': 0.66,
+  'red-brush': 0.66,
   'circle-panel': 1,
   'triangle-panel': 1,
   'square-panel': 1,
@@ -413,6 +413,8 @@ function checkAnswer() {
     feedbackEl.style.background = "#B4DDC0";
     feedbackEl.style.padding = "8px 10px";
     localStorage.setItem('unlocked_' + ANSWER, 'true');
+    localStorage.setItem("answer_" + ANSWER, userAnswer);
+
   } else {
     feedbackEl.textContent = "入力されたパスワードに誤りがあります。";
     feedbackEl.style.background = "#E3B0A6";
