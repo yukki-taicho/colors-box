@@ -686,7 +686,6 @@ if (
   clearSelection();
   renderPlacedItems();
   checkPuzzleSolved();
-  showDebugCoords(xPct, yPct);
 });
 
 function applyRedBrush() {
@@ -744,12 +743,6 @@ function checkPuzzleSolved() {
   puzzleConditionMet =
       (triangleOk && squareOk) ||
       localStorage.getItem("acacia_red") === "true";
-}
-
-function showDebugCoords(x, y) {
-  const el = document.getElementById('debugCoords');
-  el.textContent = `x: ${x.toFixed(1)}%  y: ${y.toFixed(1)}%`;
-  el.style.display = 'block';
 }
 
 if (localStorage.getItem("acacia_red") === "true") {
