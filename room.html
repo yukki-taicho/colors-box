@@ -491,12 +491,6 @@ renderBoxes();
 renderItemSlots();
 if (isItemTaken('ACACIA')) revealFinalBox();
 
-// Reset everything back to the initial state (dev/testing convenience)
-document.getElementById('resetBtn').addEventListener('click', () => {
-  localStorage.clear();
-  location.reload();
-});
-
 document.getElementById('rulesBtn').addEventListener('click', () => {
     window.location.href = 'rules.html';
 });
