@@ -360,13 +360,22 @@ function renderBoxes() {
   });
 }
 
+const puzzlePages = {
+  ACACIA: "box1.html",
+  CICADA: "box2.html",
+  DECADE: "box3.html",
+  COFFEE: "box4.html",
+  FFFFFF: "box-f.html"
+};
+
+
 document.querySelectorAll('.box-cell').forEach(btn => {
   btn.addEventListener('click', () => {
     const key = btn.dataset.key;
 
     if (!isUnlocked(key)) {
       // Not solved yet: go to its puzzle page
-      window.location.href = 'puzzle-' + key.toLowerCase() + '.html';
+      window.location.href = puzzlePages[key];
       return;
     }
 
@@ -378,7 +387,7 @@ document.querySelectorAll('.box-cell').forEach(btn => {
         revealFinalBox();
         showAcquireOverlay([{ label: '白い箱' }]);
       } else {
-        window.location.href = 'puzzle-acacia.html';
+        window.location.href = 'box4.html';
       }
       return;
     }
@@ -403,7 +412,7 @@ document.querySelectorAll('.box-cell').forEach(btn => {
       renderItemSlots();
       showAcquireOverlay(acquired);
     } else {
-      window.location.href = 'puzzle-' + key.toLowerCase() + '.html';
+      window.location.href = puzzlePages[key];
     }
   });
 });
