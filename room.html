@@ -458,17 +458,16 @@ function showNextAcquire() {
 }
 
 document.getElementById('acquireOkBtn').addEventListener('click', showNextAcquire);
-
-const ITEM_SCALE = {
-  'two-panel': 5,
-  'brush': 5,
-  'red-brush': 5,
-  'circle-panel': 5,
-  'triangle-panel': 5,
-  'square-panel': 5
-};
   
 // ---- Item slot rendering: reflects the saved inventory, left to right ----
+const ITEM_SCALE = {
+  'two-panel': 1,
+  'brush': 0.66,
+  'red-brush': 0.66,
+  'circle-panel': 1,
+  'triangle-panel': 1,
+  'square-panel': 1
+};
 
 function renderItemSlots() {
   const slots = Array.from(document.querySelectorAll('.item-slot'));
@@ -477,19 +476,23 @@ function renderItemSlots() {
     const item = inv[i];
     if (item) {
       slot.classList.add('filled');
-      const scale = ITEM_SCALE[item.id] ?? 1;
+      slot.dataset.itemId = item.id;
+      slot.dataset.itemIndex = i;
       slot.innerHTML = `
         <img
           src="${item.imgSrc}"
           alt="${item.label}"
           style="
-            width: ${70 * scale}%;
-            height: ${70 * scale}%;
+            width: ${70 * (ITEM_SCALE[item.id] || 1)}%;
+            height: ${70 * (ITEM_SCALE[item.id] || 1)}%;
             object-fit: contain;
+            transform: ${transformFor(item)};
           "
-        `;
+        >`;
     } else {
       slot.classList.remove('filled');
+      slot.removeAttribute('data-item-id');
+      slot.removeAttribute('data-item-index');
       slot.innerHTML = '';
     }
   });
