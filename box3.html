@@ -484,6 +484,7 @@ function checkAnswer() {
     feedbackEl.style.background = "#D9FFF0";
     feedbackEl.style.padding = "8px 10px";
     localStorage.setItem('unlocked_' + ANSWER, 'true');
+    localStorage.setItem("answer_" + ANSWER, userAnswer);
   } else {
     feedbackEl.textContent = "入力されたパスワードに誤りがあります。";
     feedbackEl.style.background = "#E3B0A6";
